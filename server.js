@@ -19,7 +19,7 @@ app.get("/", function (req, res) {
   res.sendStatus(200);
 });
 
-app.get("/users/create", function (req, res) {
+app.get("/webhook", function (req, res) {
   if (
     req.query["hub.mode"] == "subscribe" &&
     req.query["hub.verify_token"] == process.env.FB_VERIFICATION_TOKEN
