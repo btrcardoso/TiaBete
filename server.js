@@ -65,49 +65,20 @@ app.post("/webhook", async function (request, response) {
     let contactName =
       request.body.entry[0].changes[0].value.contacts[0].profile.name;
     let msgText;
+    console.log("Informações da mensagem:");
+    console.log("request.body: ", request.body);
+    console.log("messageType: ", messageType);
+    console.log("messageFrom: ", messageFrom);
+    console.log("messageTimeStamp: ", messageTimeStamp);
+    console.log("ourNumberId: ", ourNumberId);
+    console.log("contactName: ", contactName);
+
     if (!status) {
       if (messageType == "text") {
         let messageContent =
           request.body.entry[0].changes[0].value.messages[0].text.body;
-        if (
-          messageContent.includes("Oi, TiaBete. É a minha primeira vez aqui!")
-        ) {
-          const user = await mongodb.getUser(messageFrom);
-          //if verifyUser send oi, usuário
-          if (user) {
-            msgText = `Bem-vindo de volta, ${user.name}!`;
-            chat.text.send(ourNumberId, messageFrom, msgText);
-          } else {
-            const userJson = {
-              name: contactName,
-              phone: messageFrom,
-            };
-            await mongodb.createUser(userJson);
-            msgText = `Olá, *${userJson.name}*!\n\nSou a *TiaBete*, sua parceira para o controle do diabetes! Estou aqui para te ajudar a acompanhar sua alimentação, medicamentos, exercícios e glicose no sangue.\n\nVamos juntos tornar o gerenciamento do diabetes mais fácil, barato e tranquilo.\n\nVocê pode me dizer tudo o que pode impactar em seu índice glicêmico, como por exemplo:\n\n- *Alimentação:* "Comi macarronada agora"\n- *Exercícios físicos:* "Fiz 30 minutos de natação"\n- *Glicemia:* "Minha glicose está em 100mg/dL"\n- *Medicamentos:* "Tomei uma dose de insulina"\n\nVocê pode me mandar em *áudio* se preferir. 🔊`;
 
-            chat.text.send(ourNumberId, messageFrom, msgText);
-          }
-          //else criar usuário e send onboarding
-        } else {
-          console.log(messageContent);
-          let jsonResult = await chat.chatGptService.categorize(
-            messageTimeStamp,
-            messageContent
-          );
-          msgText = await feedbacks.getFeedbackMessage(jsonResult);
-          chat.text.send(ourNumberId, messageFrom, msgText);
-        }
-      } else if (messageType == "audio") {
-        let mediaId =
-          request.body.entry[0].changes[0].value.messages[0].audio.id;
-        let messageContent = await media.mediaService.getFileAndTranscribe(
-          mediaId
-        );
-        let jsonResult = await chat.chatGptService.categorize(
-          messageTimeStamp,
-          messageContent
-        );
-        msgText = await feedbacks.getFeedbackMessage(jsonResult);
+        (msgText = "messageContent: "), messageContent;
         chat.text.send(ourNumberId, messageFrom, msgText);
       } else {
         console.log("API inconsistente");
@@ -120,6 +91,81 @@ app.post("/webhook", async function (request, response) {
     response.sendStatus(400);
   }
 });
+
+// app.post("/webhook", async function (request, response) {
+//   console.log("Incoming webhook: " + JSON.stringify(request.body));
+//   if (
+//     request.body.entry &&
+//     request.body.entry[0].changes &&
+//     request.body.entry[0].changes[0] &&
+//     request.body.entry[0].changes[0].value.messages &&
+//     request.body.entry[0].changes[0].value.messages[0]
+//   ) {
+//     let messageType = request.body.entry[0].changes[0].value.messages[0].type;
+//     let messageFrom = request.body.entry[0].changes[0].value.messages[0].from;
+//     let messageTimeStamp =
+//       request.body.entry[0].changes[0].value.messages[0].timestamp;
+//     let ourNumberId =
+//       request.body.entry[0].changes[0].value.metadata.phone_number_id;
+//     let status = request.body.entry[0].changes[0].statuses;
+//     let contactName =
+//       request.body.entry[0].changes[0].value.contacts[0].profile.name;
+//     let msgText;
+//     if (!status) {
+//       if (messageType == "text") {
+//         let messageContent =
+//           request.body.entry[0].changes[0].value.messages[0].text.body;
+//         if (
+//           messageContent.includes("Oi, TiaBete. É a minha primeira vez aqui!")
+//         ) {
+//           const user = await mongodb.getUser(messageFrom);
+//           //if verifyUser send oi, usuário
+//           if (user) {
+//             msgText = `Bem-vindo de volta, ${user.name}!`;
+//             chat.text.send(ourNumberId, messageFrom, msgText);
+//           } else {
+//             const userJson = {
+//               name: contactName,
+//               phone: messageFrom,
+//             };
+//             await mongodb.createUser(userJson);
+//             msgText = `Olá, *${userJson.name}*!\n\nSou a *TiaBete*, sua parceira para o controle do diabetes! Estou aqui para te ajudar a acompanhar sua alimentação, medicamentos, exercícios e glicose no sangue.\n\nVamos juntos tornar o gerenciamento do diabetes mais fácil, barato e tranquilo.\n\nVocê pode me dizer tudo o que pode impactar em seu índice glicêmico, como por exemplo:\n\n- *Alimentação:* "Comi macarronada agora"\n- *Exercícios físicos:* "Fiz 30 minutos de natação"\n- *Glicemia:* "Minha glicose está em 100mg/dL"\n- *Medicamentos:* "Tomei uma dose de insulina"\n\nVocê pode me mandar em *áudio* se preferir. 🔊`;
+
+//             chat.text.send(ourNumberId, messageFrom, msgText);
+//           }
+//           //else criar usuário e send onboarding
+//         } else {
+//           console.log(messageContent);
+//           let jsonResult = await chat.chatGptService.categorize(
+//             messageTimeStamp,
+//             messageContent
+//           );
+//           msgText = await feedbacks.getFeedbackMessage(jsonResult);
+//           chat.text.send(ourNumberId, messageFrom, msgText);
+//         }
+//       } else if (messageType == "audio") {
+//         let mediaId =
+//           request.body.entry[0].changes[0].value.messages[0].audio.id;
+//         let messageContent = await media.mediaService.getFileAndTranscribe(
+//           mediaId
+//         );
+//         let jsonResult = await chat.chatGptService.categorize(
+//           messageTimeStamp,
+//           messageContent
+//         );
+//         msgText = await feedbacks.getFeedbackMessage(jsonResult);
+//         chat.text.send(ourNumberId, messageFrom, msgText);
+//       } else {
+//         console.log("API inconsistente");
+//         msgText = "Ainda estou aprendendo a responder esse tipo de mensagem.";
+//         chat.text.send(ourNumberId, messageFrom, msgText);
+//       }
+//     }
+//     response.sendStatus(200);
+//   } else {
+//     response.sendStatus(400);
+//   }
+// });
 
 /**
  * Endpoints de teste
