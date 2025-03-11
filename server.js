@@ -54,17 +54,16 @@ app.post("/webhook", async function (request, response) {
   const statuses = firstChange?.statuses;
   const value = firstChange?.value;
 
+  const ourNumberId = value?.metadata?.phone_number_id;
   const message = value?.messages ? value.messages[0] : undefined;
-  const metadata = value?.metadata;
   const contactName = value?.contacts
     ? value.contacts[0]?.profile?.name
     : undefined;
 
-  if (message && metadata) {
+  if (message && ourNumberId) {
     const messageType = message.type;
     const messageFrom = message.from;
     const messageTimeStamp = message.timestamp;
-    const ourNumberId = metadata.phone_number_id;
     let msgText;
 
     if (!statuses) {
