@@ -1,7 +1,7 @@
 const axios = require("axios");
 require("dotenv").config();
 
-const IGNORE_REGEX = "ignor/";
+const IGNORE_REGEX = /^ignor.*/;
 
 function sanitizeMessage(message) {
   return message
@@ -13,9 +13,9 @@ function sanitizeMessage(message) {
 }
 
 function categorize(message) {
-  // if (IGNORE_REGEX.test(message)) {
-  //   return "IGNORE";
-  // }
+  if (IGNORE_REGEX.test(message)) {
+    return "IGNORE";
+  }
 
   return "INDEFINITE";
 }
@@ -25,12 +25,14 @@ function buildResponse(userPhone, message) {
     return "Mensagem não suportada.";
   }
 
-  const tokens = sanitizeMessage(message.slice(0, 100))
-    .split(/[.,]/) //separa tokens por acentos e pontos
-    .filter((token) => token !== ""); //remove tokens vazios
+  const tokens = message
+    .slice(0, 100) // primeiros 100 caracteres
+    .split(/[.,]/) // separa tokens por acentos e pontos
+    .filter((token) => token !== ""); // remove tokens vazios
 
   const data = tokens?.map((token) => {
-    return { message: token, categorie: categorize(token) };
+    const sanitizedToken = sanitizeMessage(token);
+    return { message: sanitizedToken, categorie: categorize(sanitizedToken) };
   });
 
   return (
