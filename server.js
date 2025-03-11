@@ -69,7 +69,7 @@ app.post("/webhook", async function (request, response) {
     if (!statuses) {
       if (messageType == "text") {
         let messageContent = message?.text?.body;
-        msgText = "[v2] messageContent: " + messageContent;
+        msgText = "[v3] messageContent: " + messageContent;
       } else {
         console.warn("API inconsistente");
         msgText = "Ainda estou aprendendo a responder esse tipo de mensagem.";

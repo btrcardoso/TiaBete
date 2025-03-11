@@ -11,7 +11,7 @@ async function send(fromId, destinationNumber, messageText) {
   try {
     let message = await axios({
       method: "POST",
-      url: "https://graph.facebook.com/v22.0/" + fromId + "/messages",
+      url: `https://graph.facebook.com/${process.env.FB_API_VERSION}/${fromId}/messages`,
       data: {
         messaging_product: "whatsapp",
         to: destinationNumber,
