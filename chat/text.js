@@ -3,7 +3,9 @@ require("dotenv").config();
 
 async function send(fromId, destinationNumber, messageText) {
   if (process.env.ENV === "DEV") {
-    console.log("Mensagem a ser enviada: ", messageText);
+    console.log(
+      `Enviando mensagem de ${fromId} para ${destinationNumber}: ${messageText}`
+    );
     return;
   }
   try {
