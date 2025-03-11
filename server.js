@@ -48,43 +48,34 @@ app.post("/users/create", async function (req, res) {
 
 app.post("/webhook", async function (request, response) {
   console.log("Incoming webhook: " + JSON.stringify(request.body));
-  if (
-    request.body.entry &&
-    request.body.entry[0].changes &&
-    request.body.entry[0].changes[0] &&
-    request.body.entry[0].changes[0].value.messages &&
-    request.body.entry[0].changes[0].value.messages[0]
-  ) {
-    let messageType = request.body.entry[0].changes[0].value.messages[0].type;
-    let messageFrom = request.body.entry[0].changes[0].value.messages[0].from;
-    let messageTimeStamp =
-      request.body.entry[0].changes[0].value.messages[0].timestamp;
-    let ourNumberId =
-      request.body.entry[0].changes[0].value.metadata.phone_number_id;
-    let status = request.body.entry[0].changes[0].statuses;
-    let contactName =
-      request.body.entry[0].changes[0].value.contacts[0].profile.name;
+
+  const firstEntry = request.body.entry ? request.body.entry[0] : undefined;
+  const firstChange = firstEntry?.changes ? firstEntry.changes[0] : undefined;
+  const statuses = firstChange?.statuses;
+  const value = firstChange?.value;
+
+  const message = value?.messages ? value.messages[0] : undefined;
+  const metadata = value?.metadata;
+  const contactName = value?.contacts
+    ? value.contacts[0]?.profile?.name
+    : undefined;
+
+  if (message && metadata) {
+    const messageType = message.type;
+    const messageFrom = message.from;
+    const messageTimeStamp = message.timestamp;
+    const ourNumberId = metadata.phone_number_id;
     let msgText;
-    console.log("Informações da mensagem:");
-    console.log("request.body: ", request.body);
-    console.log("messageType: ", messageType);
-    console.log("messageFrom: ", messageFrom);
-    console.log("messageTimeStamp: ", messageTimeStamp);
-    console.log("ourNumberId: ", ourNumberId);
-    console.log("contactName: ", contactName);
 
-    if (!status) {
+    if (!statuses) {
       if (messageType == "text") {
-        let messageContent =
-          request.body.entry[0].changes[0].value.messages[0].text.body;
-
-        msgText = "messageContent: " + messageContent;
-        chat.text.send(ourNumberId, messageFrom, msgText);
+        let messageContent = message?.text?.body;
+        msgText = "[v2] messageContent: " + messageContent;
       } else {
-        console.log("API inconsistente");
+        console.warn("API inconsistente");
         msgText = "Ainda estou aprendendo a responder esse tipo de mensagem.";
-        chat.text.send(ourNumberId, messageFrom, msgText);
       }
+      chat.text.send(ourNumberId, messageFrom, msgText);
     }
     response.sendStatus(200);
   } else {

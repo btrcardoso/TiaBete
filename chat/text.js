@@ -2,6 +2,12 @@ const axios = require("axios");
 require("dotenv").config();
 
 async function send(fromId, destinationNumber, messageText) {
+  if (process.env.ENV === "DEV") {
+    console.log(
+      `Enviando mensagem de ${fromId} para ${destinationNumber}: ${messageText}`
+    );
+    return;
+  }
   try {
     let message = await axios({
       method: "POST",
