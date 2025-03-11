@@ -63,15 +63,9 @@ app.post("/webhook", async function (request, response) {
       request.body.entry[0].changes[0].value.metadata.phone_number_id;
     let status = request.body.entry[0].changes[0].statuses;
     let contactName =
-      request.body.entry[0].changes[0].value.contacts[0].profile.name;
+      request.body.entry[0].changes[0].value.contacts &&
+      request.body.entry[0].changes[0].value.contacts[0]?.profile.name;
     let msgText;
-    console.log("Informações da mensagem:");
-    console.log("request.body: ", request.body);
-    console.log("messageType: ", messageType);
-    console.log("messageFrom: ", messageFrom);
-    console.log("messageTimeStamp: ", messageTimeStamp);
-    console.log("ourNumberId: ", ourNumberId);
-    console.log("contactName: ", contactName);
 
     if (!status) {
       if (messageType == "text") {
