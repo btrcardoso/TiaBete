@@ -2,6 +2,9 @@ const axios = require("axios");
 require("dotenv").config();
 
 const IGNORE_REGEX = /^ignor.*/;
+const INSULIN_NPH_REGEX = /^[0-9]+\s?(n|nph)$/;
+const INSULIN_R_REGEX = /^[0-9]+\s?(r|reg|regular)$/;
+const INSULIN_UR_REGEX = /^[0-9]+\s?(u\s?r|ultra\s?rapida|fiasp)$/;
 
 function sanitizeMessage(message) {
   return message
@@ -15,6 +18,12 @@ function sanitizeMessage(message) {
 function categorize(message) {
   if (IGNORE_REGEX.test(message)) {
     return "IGNORE";
+  } else if (INSULIN_NPH_REGEX.test(message)) {
+    return "INSULIN_NPH";
+  } else if (INSULIN_R_REGEX.test(message)) {
+    return "INSULIN_R";
+  } else if (INSULIN_UR_REGEX.test(message)) {
+    return "INSULIN_UR";
   }
 
   return "INDEFINITE";
