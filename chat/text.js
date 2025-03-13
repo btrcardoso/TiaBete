@@ -25,6 +25,16 @@ const SNACK_REGEX = /^lanche/;
 const DINNER_REGEX = /^jant/;
 const COMPENSATORY_MEAL_REGEX = /^compens/;
 
+const GYM_REGEX = /^(trein|acad(emia)?)/;
+const STRENGTH_TRAINING_REGEX = /^musc(ulacao)?/;
+const AEROBIC_EXERCISE_REGEX = /^((cardio(vascular)?)|(aerobi(o|co)))/;
+// const HEAVY_STRENGTH_TRAINING_REGEX = /^musc(ulacao)?(\s(pesad(o|a)|forte))?/;
+// const LIGHT_STRENGTH_TRAINING_REGEX = /^musc(ulacao)?(\sleve)?/;
+// const HEAVY_AEROBIC_EXERCISE_REGEX =
+//   /^((cardio(vascular)?)|(aerobi(o|co)))(\s(pesad(o|a)|forte))?/;
+// const LIGHT_AEROBIC_EXERCISE_REGEX =
+//   /^((cardio(vascular)?)|(aerobi(o|co)))(\sleve)?/;
+
 function sanitizeMessage(message) {
   return message
     .toLowerCase() // Converte para minúsculas
@@ -63,8 +73,13 @@ function categorize(message) {
     return "DINNER";
   } else if (COMPENSATORY_MEAL_REGEX.test(message)) {
     return "COMPENSATORY_MEAL";
+  } else if (GYM_REGEX.test(message)) {
+    return "GYM";
+  } else if (STRENGTH_TRAINING_REGEX.test(message)) {
+    return "STRENGTH_TRAINING";
+  } else if (AEROBIC_EXERCISE_REGEX.test(message)) {
+    return "AEROBIC_EXERCISE";
   }
-
   return "INDEFINITE";
 }
 
