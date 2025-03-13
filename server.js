@@ -69,14 +69,16 @@ app.post("/webhook", async function (request, response) {
     if (!statuses) {
       if (messageType == "text") {
         let messageContent = message?.text?.body;
-        msgText = "[v3] messageContent: " + messageContent;
+        msgText = chat.text.buildResponse(messageFrom, messageContent);
       } else {
         console.warn("API inconsistente");
         msgText = "Ainda estou aprendendo a responder esse tipo de mensagem.";
       }
       chat.text.send(ourNumberId, messageFrom, msgText);
     }
-    response.sendStatus(200);
+
+    response.sendStatus(200); //TODO descomentar
+    // response.send(msgText).status(200);
   } else {
     response.sendStatus(400);
   }

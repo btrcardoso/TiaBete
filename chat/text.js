@@ -1,6 +1,107 @@
 const axios = require("axios");
 require("dotenv").config();
 
+const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
+const TIME_COLON = /^([01]?[0-9]|2[0-3]):[0-5][0-9]/;
+
+const IGNORE_REGEX = /^ignor.*/;
+const INSULIN_NPH_REGEX = /^[0-9]+\s?(n|nph)$/;
+const INSULIN_R_REGEX = /^[0-9]+\s?(r|reg|regular)$/;
+const INSULIN_UR_REGEX = /^[0-9]+\s?(u\s?r|ultra\s?rapida|fiasp)$/;
+
+function sanitizeMessage(message) {
+  return message
+    .toLowerCase() // Converte para minúsculas
+    .normalize("NFD") // Decompõe caracteres acentuados
+    .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+    .replace(/\s+/g, " ") // Substitui múltiplos espaços por um único
+    .trim(); // Remove espaços extras no início e fim
+}
+
+function categorize(message) {
+  if (IGNORE_REGEX.test(message)) {
+    return "IGNORE";
+  } else if (INSULIN_NPH_REGEX.test(message)) {
+    return "INSULIN_NPH";
+  } else if (INSULIN_R_REGEX.test(message)) {
+    return "INSULIN_R";
+  } else if (INSULIN_UR_REGEX.test(message)) {
+    return "INSULIN_UR";
+  }
+
+  return "INDEFINITE";
+}
+
+function separateMatchedAndRemainingParts(str, regex) {
+  const match = str.match(regex);
+  let result;
+
+  if (match) {
+    const matchedPart = match[0];
+    const remainingPart = str.slice(matchedPart.length);
+
+    result = {
+      matchedPart: matchedPart,
+      remainingPart: remainingPart,
+    };
+  } else {
+    result = {
+      matchedPart: null,
+      remainingPart: str,
+    };
+  }
+  return result;
+}
+
+function buildResponse(userPhone, message) {
+  if (typeof message !== "string") {
+    return "Mensagem não suportada.";
+  }
+
+  const tokens = message
+    .slice(0, 100) // primeiros 100 caracteres
+    .split(/[.,]/) // separa tokens por acentos e pontos
+    .filter((token) => token !== ""); // remove tokens vazios
+
+  const data = tokens?.map((dirtyToken) => {
+    let token = sanitizeMessage(dirtyToken);
+    let time = null;
+
+    const startsWithTimeH = separateMatchedAndRemainingParts(token, TIME_H);
+    const startsWithTimeColon = separateMatchedAndRemainingParts(
+      token,
+      TIME_COLON
+    );
+
+    if (startsWithTimeH.matchedPart) {
+      time = startsWithTimeH.matchedPart;
+      token = startsWithTimeH.remainingPart;
+    } else if (startsWithTimeColon.matchedPart) {
+      time = startsWithTimeColon.matchedPart;
+      token = startsWithTimeColon.remainingPart;
+    }
+
+    token = sanitizeMessage(token);
+
+    return {
+      dirtyToken,
+      token,
+      categorie: categorize(token),
+      time,
+    };
+  });
+
+  return (
+    "finalMessage: \n" +
+    data
+      ?.map(
+        (info) =>
+          `dirtyToken: ${info.dirtyToken}\ntoken: ${info.token}\ncategorie: ${info.categorie}\ntime: ${info.time}`
+      )
+      ?.join(" \n\n")
+  );
+}
+
 async function send(fromId, destinationNumber, messageText) {
   if (process.env.ENV === "DEV") {
     console.log(
@@ -30,4 +131,4 @@ async function send(fromId, destinationNumber, messageText) {
   }
 }
 
-module.exports = { send };
+module.exports = { send, buildResponse };
