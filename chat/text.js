@@ -1,6 +1,9 @@
 const axios = require("axios");
 require("dotenv").config();
 
+const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
+const TIME_COLON = /^([01]?[0-9]|2[0-3]):[0-5][0-9]/;
+
 const IGNORE_REGEX = /^ignor.*/;
 const INSULIN_NPH_REGEX = /^[0-9]+\s?(n|nph)$/;
 const INSULIN_R_REGEX = /^[0-9]+\s?(r|reg|regular)$/;
@@ -29,6 +32,27 @@ function categorize(message) {
   return "INDEFINITE";
 }
 
+function separateMatchedAndRemainingParts(str, regex) {
+  const match = str.match(regex);
+  let result;
+
+  if (match) {
+    const matchedPart = match[0];
+    const remainingPart = str.slice(matchedPart.length);
+
+    result = {
+      matchedPart: matchedPart,
+      remainingPart: remainingPart,
+    };
+  } else {
+    result = {
+      matchedPart: null,
+      remainingPart: str,
+    };
+  }
+  return result;
+}
+
 function buildResponse(userPhone, message) {
   if (typeof message !== "string") {
     return "Mensagem não suportada.";
@@ -39,15 +63,41 @@ function buildResponse(userPhone, message) {
     .split(/[.,]/) // separa tokens por acentos e pontos
     .filter((token) => token !== ""); // remove tokens vazios
 
-  const data = tokens?.map((token) => {
-    const sanitizedToken = sanitizeMessage(token);
-    return { message: sanitizedToken, categorie: categorize(sanitizedToken) };
+  const data = tokens?.map((dirtyToken) => {
+    let token = sanitizeMessage(dirtyToken);
+    let time = null;
+
+    const startsWithTimeH = separateMatchedAndRemainingParts(token, TIME_H);
+    const startsWithTimeColon = separateMatchedAndRemainingParts(
+      token,
+      TIME_COLON
+    );
+
+    if (startsWithTimeH.matchedPart) {
+      time = startsWithTimeH.matchedPart;
+      token = startsWithTimeH.remainingPart;
+    } else if (startsWithTimeColon.matchedPart) {
+      time = startsWithTimeColon.matchedPart;
+      token = startsWithTimeColon.remainingPart;
+    }
+
+    token = sanitizeMessage(token);
+
+    return {
+      dirtyToken,
+      token,
+      categorie: categorize(token),
+      time,
+    };
   });
 
   return (
     "finalMessage: \n" +
     data
-      ?.map((info) => `message: ${info.message}\ncategorie: ${info.categorie}`)
+      ?.map(
+        (info) =>
+          `dirtyToken: ${info.dirtyToken}\ntoken: ${info.token}\ncategorie: ${info.categorie}\ntime: ${info.time}`
+      )
       ?.join(" \n\n")
   );
 }
