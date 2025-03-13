@@ -11,6 +11,10 @@ const INSULIN_UR_REGEX = /^[0-9]+\s?(u\s?r|ultra\s?rapida|fiasp)$/;
 
 const GLUCOSE_REGEX =
   /^(gl(i|u)c?o?s?e?\s?)?\d+\s?(mg\/?dl|(gl(i|u)c?o?s?e?))?$/;
+const SPELLED_HIGH_GLUCOSE_REGEX =
+  /^(hiperg?l?i?c?e?m?i?a?)\s?(leve|braba|grave)?/;
+const SPELLED_LOW_GLUCOSE_REGEX =
+  /^(hipog?l?i?c?e?m?i?a?)\s?(leve|braba|grave)?/;
 
 function sanitizeMessage(message) {
   return message
@@ -32,6 +36,10 @@ function categorize(message) {
     return "INSULIN_UR";
   } else if (GLUCOSE_REGEX.test(message)) {
     return "GLUCOSE";
+  } else if (SPELLED_HIGH_GLUCOSE_REGEX.test(message)) {
+    return "SPELLED_HIGH_GLUCOSE";
+  } else if (SPELLED_LOW_GLUCOSE_REGEX.test(message)) {
+    return "SPELLED_LOW_GLUCOSE";
   }
 
   return "INDEFINITE";
