@@ -16,6 +16,12 @@ const SPELLED_HIGH_GLUCOSE_REGEX =
 const SPELLED_LOW_GLUCOSE_REGEX =
   /^(hipog?l?i?c?e?m?i?a?)\s?(leve|braba|grave)?/;
 
+const BREAKFAST_REGEX = /^cafe/;
+const LUNCH_REGEX = /^almoc/;
+const SNACK_REGEX = /^lanche/;
+const DINNER_REGEX = /^jant/;
+const COMPENSATORY_MEAL_REGEX = /^compens/;
+
 function sanitizeMessage(message) {
   return message
     .toLowerCase() // Converte para minúsculas
@@ -40,6 +46,16 @@ function categorize(message) {
     return "SPELLED_HIGH_GLUCOSE";
   } else if (SPELLED_LOW_GLUCOSE_REGEX.test(message)) {
     return "SPELLED_LOW_GLUCOSE";
+  } else if (BREAKFAST_REGEX.test(message)) {
+    return "BREAKFAST";
+  } else if (LUNCH_REGEX.test(message)) {
+    return "LUNCH";
+  } else if (SNACK_REGEX.test(message)) {
+    return "SNACK";
+  } else if (DINNER_REGEX.test(message)) {
+    return "DINNER";
+  } else if (COMPENSATORY_MEAL_REGEX.test(message)) {
+    return "COMPENSATORY_MEAL";
   }
 
   return "INDEFINITE";
