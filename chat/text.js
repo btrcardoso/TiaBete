@@ -9,6 +9,9 @@ const INSULIN_NPH_REGEX = /^[0-9]+\s?(n|nph)$/;
 const INSULIN_R_REGEX = /^[0-9]+\s?(r|reg|regular)$/;
 const INSULIN_UR_REGEX = /^[0-9]+\s?(u\s?r|ultra\s?rapida|fiasp)$/;
 
+const GLUCOSE_REGEX =
+  /^(gl(i|u)c?o?s?e?\s?)?\d+\s?(mg\/?dl|(gl(i|u)c?o?s?e?))?$/;
+
 function sanitizeMessage(message) {
   return message
     .toLowerCase() // Converte para minúsculas
@@ -27,6 +30,8 @@ function categorize(message) {
     return "INSULIN_R";
   } else if (INSULIN_UR_REGEX.test(message)) {
     return "INSULIN_UR";
+  } else if (GLUCOSE_REGEX.test(message)) {
+    return "GLUCOSE";
   }
 
   return "INDEFINITE";
