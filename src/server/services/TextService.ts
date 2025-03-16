@@ -256,6 +256,26 @@ function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
   return result;
 }
 
+function parseTimeString(
+  timeString: string,
+  referenceDate: Date = new Date()
+): Date {
+  const regex = /(\d{1,2})[h:]?(\d{2})?/;
+  const match = timeString.match(regex);
+
+  if (!match) {
+    throw new Error(`Formato de hora inválido: ${timeString}`);
+  }
+
+  const hours = parseInt(match[1], 10);
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+
+  const date = new Date(referenceDate);
+  date.setHours(hours, minutes, 0, 0);
+
+  return date;
+}
+
 function buildResponse(
   userId: string,
   message: string,
@@ -284,7 +304,10 @@ function buildResponse(
       token = startsWithTimeColon.remainingPart;
     }
 
-    const date = new Date(timestamp * 1000);
+    let date = new Date(timestamp * 1000);
+    if (dirtyTime) {
+      date = parseTimeString(dirtyTime, date);
+    }
 
     token = sanitizeMessage(token);
     return {
