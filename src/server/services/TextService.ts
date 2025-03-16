@@ -258,7 +258,8 @@ function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
 
 function buildResponse(
   userId: string,
-  message: string
+  message: string,
+  timestamp: number
 ): { records: Record[]; message: string } {
   const tokens = message
     //.slice(0, 100) // primeiros 100 caracteres
@@ -283,8 +284,18 @@ function buildResponse(
       token = startsWithTimeColon.remainingPart;
     }
 
+    const date = new Date(timestamp * 1000);
+
     token = sanitizeMessage(token);
-    return { dirtyToken, token, dirtyTime, userId, ...buildBaseRecord(token) };
+    return {
+      createdAt: new Date(),
+      date,
+      userId,
+      dirtyToken,
+      token,
+      dirtyTime,
+      ...buildBaseRecord(token),
+    };
   });
 
   return { records, message: print(records) };
@@ -296,7 +307,7 @@ function print(records: Record[]): string {
     records
       ?.map(
         (record) =>
-          `dirtyToken: ${record.dirtyToken}\ntoken: ${record.token}\ntokenType: ${record.tokenType}\ncategorie: ${record.categorie}\ndirtyTime: ${record.dirtyTime}\nstringValue: ${record.stringValue}\nnumberValue: ${record.numberValue}\nunit: ${record.unit}`
+          `createdAt: ${record.createdAt}\ndate: ${record.date}\ndirtyToken: ${record.dirtyToken}\ntoken: ${record.token}\ndirtyTime: ${record.dirtyTime}\ntokenType: ${record.tokenType}\ncategorie: ${record.categorie}\nstringValue: ${record.stringValue}\nnumberValue: ${record.numberValue}\nunit: ${record.unit}`
       )
       ?.join(" \n\n")
   );

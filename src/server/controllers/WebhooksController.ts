@@ -46,7 +46,8 @@ async function receiveAndSendMessage(request: Request, response: Response) {
           if (userId) {
             const buildedResponse = TextService.buildResponse(
               userId,
-              messageContent
+              messageContent,
+              messageTimeStamp
             );
             await RecordsService.insertRecords(buildedResponse.records);
             msgText = buildedResponse.message;

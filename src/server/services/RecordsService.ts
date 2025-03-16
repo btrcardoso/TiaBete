@@ -57,6 +57,8 @@ export interface BaseRecord {
 }
 
 export interface Record extends BaseRecord {
+  createdAt: Date;
+  date: Date;
   userId: string;
   dirtyToken: string;
   token: string;
