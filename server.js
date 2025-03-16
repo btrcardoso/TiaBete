@@ -77,8 +77,8 @@ app.post("/webhook", async function (request, response) {
       chat.text.send(ourNumberId, messageFrom, msgText);
     }
 
-    //response.sendStatus(200); //TODO descomentar
-    response.send(msgText).status(200);
+    response.sendStatus(200); //TODO descomentar
+    //response.send(msgText).status(200);
   } else {
     response.sendStatus(400);
   }
