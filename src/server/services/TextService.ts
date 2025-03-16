@@ -5,6 +5,8 @@ import {
   RecordCategorie,
   INSULIN_UNIT,
   GLUCOSE_UNIT,
+  HIGH_GLUCOSE,
+  LOW_GLUCOSE,
 } from "./RecordsService";
 dotenv.config();
 
@@ -148,7 +150,7 @@ function buildRecord(
       tokenType: TokenType.SPELLED_HIGH_GLUCOSE,
       categorie: RecordCategorie.GLUCOSE,
       stringValue: undefined,
-      numberValue: 250,
+      numberValue: HIGH_GLUCOSE,
       unit: GLUCOSE_UNIT,
     };
   } else if (SPELLED_LOW_GLUCOSE_REGEX.test(token)) {
@@ -159,7 +161,7 @@ function buildRecord(
       tokenType: TokenType.SPELLED_LOW_GLUCOSE,
       categorie: RecordCategorie.GLUCOSE,
       stringValue: undefined,
-      numberValue: 50,
+      numberValue: LOW_GLUCOSE,
       unit: GLUCOSE_UNIT,
     };
   } else if (BREAKFAST_REGEX.test(token)) {

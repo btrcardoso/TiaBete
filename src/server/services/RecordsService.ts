@@ -40,6 +40,11 @@ export enum RecordCategorie {
   INDEFINITE = "INDEFINITE",
 }
 
+export const INSULIN_UNIT = "UI";
+export const GLUCOSE_UNIT = "mg/dL";
+export const LOW_GLUCOSE = 50;
+export const HIGH_GLUCOSE = 250;
+
 export interface Record {
   dirtyToken: string;
   token: string;
@@ -50,6 +55,3 @@ export interface Record {
   numberValue?: number;
   unit?: string;
 }
-
-export const GLUCOSE_UNIT = "mg/dL";
-export const INSULIN_UNIT = "UI";
