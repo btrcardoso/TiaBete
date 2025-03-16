@@ -1,5 +1,5 @@
 //const dotenv = require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 const dbClient = new MongoClient(process.env.MONGO_KEY, {
   serverApi: {
@@ -36,4 +36,4 @@ async function getUser(phoneNumber) {
   }
 }
 
-module.exports = { createUser, getUser };
+export default { createUser, getUser };

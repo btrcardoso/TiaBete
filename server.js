@@ -1,14 +1,14 @@
-require("dotenv").config();
-const providers = require("./providers");
-const chat = require("./chat");
-const media = require("./media");
-const file = require("./utils/file");
-const time = require("./utils/converTime");
-const feedbacks = require("./feedbacks/feedbacks");
-const mongodb = require("./mongoDB");
+import "dotenv/config";
+import express from "express";
+import bodyParser from "body-parser";
 
-var express = require("express");
-var bodyParser = require("body-parser");
+//import providers from "./providers.js";
+import chat from "./chat/index.js";
+// import media from "./media/index.js";
+//import file from "./utils/file.js";
+//import time from "./utils/converTime.js";
+import feedbacks from "./feedbacks/feedbacks.js";
+import mongodb from "./mongoDB/index.js";
 
 var app = express();
 
@@ -78,7 +78,7 @@ app.post("/webhook", async function (request, response) {
     }
 
     response.sendStatus(200); //TODO descomentar
-    // response.send(msgText).status(200);
+    //response.send(msgText).status(200);
   } else {
     response.sendStatus(400);
   }
@@ -162,15 +162,15 @@ app.post("/webhook", async function (request, response) {
 /**
  * Endpoints de teste
  */
-app.get("/transcreva/:id", async function (req, res) {
-  try {
-    let mediaId = req.params.id;
-    result = await media.mediaService.getFileAndTranscribe(mediaId);
-    res.send(result);
-  } catch (e) {
-    res.sendStatus(500);
-  }
-});
+// app.get("/transcreva/:id", async function (req, res) {
+//   try {
+//     let mediaId = req.params.id;
+//     result = await media.mediaService.getFileAndTranscribe(mediaId);
+//     res.send(result);
+//   } catch (e) {
+//     res.sendStatus(500);
+//   }
+// });
 
 app.get("/chatgpt", async function (req, res) {
   try {

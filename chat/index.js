@@ -1,3 +1,4 @@
-const text = require('./text')
-const chatGptService = require('./chatGptService')
-module.exports = {text, chatGptService}
+import text from "./text.js";
+import chatGptService from "./chatGptService.js";
+
+export default { text, chatGptService };
