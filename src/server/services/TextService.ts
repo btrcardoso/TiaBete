@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { Categorie, Record } from "./RecordsService";
 dotenv.config();
 
 const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
@@ -47,43 +48,43 @@ function sanitizeMessage(message: string) {
 
 function categorize(message: string) {
   if (IGNORE_REGEX.test(message)) {
-    return "IGNORE";
+    return Categorie.IGNORE;
   } else if (SAVE_NOTE_REGEX.test(message)) {
-    return "SAVE_NOTE";
+    return Categorie.SAVE_NOTE;
   } else if (DELETE_REGEX.test(message)) {
-    return "DELETE";
+    return Categorie.DELETE;
   } else if (INSULIN_NPH_REGEX.test(message)) {
-    return "INSULIN_NPH";
+    return Categorie.INSULIN_NPH;
   } else if (INSULIN_R_REGEX.test(message)) {
-    return "INSULIN_R";
+    return Categorie.INSULIN_R;
   } else if (INSULIN_UR_REGEX.test(message)) {
-    return "INSULIN_UR";
+    return Categorie.INSULIN_UR;
   } else if (GLUCOSE_REGEX.test(message)) {
-    return "GLUCOSE";
+    return Categorie.GLUCOSE;
   } else if (SPELLED_HIGH_GLUCOSE_REGEX.test(message)) {
-    return "SPELLED_HIGH_GLUCOSE";
+    return Categorie.SPELLED_HIGH_GLUCOSE;
   } else if (SPELLED_LOW_GLUCOSE_REGEX.test(message)) {
-    return "SPELLED_LOW_GLUCOSE";
+    return Categorie.SPELLED_LOW_GLUCOSE;
   } else if (BREAKFAST_REGEX.test(message)) {
-    return "BREAKFAST";
+    return Categorie.BREAKFAST;
   } else if (LUNCH_REGEX.test(message)) {
-    return "LUNCH";
+    return Categorie.LUNCH;
   } else if (SNACK_REGEX.test(message)) {
-    return "SNACK";
+    return Categorie.SNACK;
   } else if (DINNER_REGEX.test(message)) {
-    return "DINNER";
+    return Categorie.DINNER;
   } else if (FREE_MEAL_REGEX.test(message)) {
-    return "FREE_MEAL";
+    return Categorie.FREE_MEAL;
   } else if (COMPENSATORY_MEAL_REGEX.test(message)) {
-    return "COMPENSATORY_MEAL";
+    return Categorie.COMPENSATORY_MEAL;
   } else if (GYM_REGEX.test(message)) {
-    return "GYM";
+    return Categorie.GYM;
   } else if (STRENGTH_TRAINING_REGEX.test(message)) {
-    return "STRENGTH_TRAINING";
+    return Categorie.STRENGTH_TRAINING;
   } else if (AEROBIC_EXERCISE_REGEX.test(message)) {
-    return "AEROBIC_EXERCISE";
+    return Categorie.AEROBIC_EXERCISE;
   }
-  return "INDEFINITE";
+  return Categorie.INDEFINITE;
 }
 
 function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
@@ -107,13 +108,13 @@ function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
   return result;
 }
 
-function buildResponse(userPhone: string, message: string) {
+function buildResponse(userPhone: string, message: string): string {
   const tokens = message
     .slice(0, 100) // primeiros 100 caracteres
     .split(/[.,]/) // separa tokens por acentos e pontos
     .filter((token) => token !== ""); // remove tokens vazios
 
-  const data = tokens?.map((dirtyToken) => {
+  const record = tokens?.map((dirtyToken) => {
     let token = sanitizeMessage(dirtyToken);
     let time = null;
 
@@ -133,6 +134,7 @@ function buildResponse(userPhone: string, message: string) {
 
     token = sanitizeMessage(token);
 
+    // todo: passar para tipo REcord
     return {
       dirtyToken,
       token,
@@ -143,7 +145,7 @@ function buildResponse(userPhone: string, message: string) {
 
   return (
     "finalMessage: \n" +
-    data
+    record
       ?.map(
         (info) =>
           `dirtyToken: ${info.dirtyToken}\ntoken: ${info.token}\ncategorie: ${info.categorie}\ntime: ${info.time}`
