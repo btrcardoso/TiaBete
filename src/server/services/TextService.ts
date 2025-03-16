@@ -1,14 +1,21 @@
 import dotenv from "dotenv";
-import { TokenType, Record } from "./RecordsService";
+import {
+  TokenType,
+  Record,
+  RecordCategorie,
+  INSULIN_UNIT,
+  GLUCOSE_UNIT,
+} from "./RecordsService";
 dotenv.config();
 
 const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
 const TIME_COLON = /^([01]?[0-9]|2[0-3]):[0-5][0-9]/;
 
 const IGNORE_REGEX = /^ignor/;
-const SAVE_NOTE_REGEX = /^salv/;
+const SAVE_NOTE_REGEX = /^salv(ar?|e)?/;
 const DELETE_REGEX = /^(excluir|delete|deletar)/;
 
+const numberRegex = /^[0-9]+/;
 const INSULIN_NPH_REGEX = /^[0-9]+\s?(n|nph)$/;
 const INSULIN_R_REGEX = /^[0-9]+\s?(r|reg|regular)$/;
 const INSULIN_UR_REGEX = /^[0-9]+\s?(u\s?r|ultra\s?rapida|fiasp)$/;
@@ -46,45 +53,238 @@ function sanitizeMessage(message: string) {
     .trim(); // Remove espaços extras no início e fim
 }
 
-function categorize(message: string) {
-  if (IGNORE_REGEX.test(message)) {
-    return TokenType.IGNORE;
-  } else if (SAVE_NOTE_REGEX.test(message)) {
-    return TokenType.SAVE_NOTE;
-  } else if (DELETE_REGEX.test(message)) {
-    return TokenType.DELETE;
-  } else if (INSULIN_NPH_REGEX.test(message)) {
-    return TokenType.INSULIN_NPH;
-  } else if (INSULIN_R_REGEX.test(message)) {
-    return TokenType.INSULIN_R;
-  } else if (INSULIN_UR_REGEX.test(message)) {
-    return TokenType.INSULIN_UR;
-  } else if (GLUCOSE_REGEX.test(message)) {
-    return TokenType.GLUCOSE;
-  } else if (SPELLED_HIGH_GLUCOSE_REGEX.test(message)) {
-    return TokenType.SPELLED_HIGH_GLUCOSE;
-  } else if (SPELLED_LOW_GLUCOSE_REGEX.test(message)) {
-    return TokenType.SPELLED_LOW_GLUCOSE;
-  } else if (BREAKFAST_REGEX.test(message)) {
-    return TokenType.BREAKFAST;
-  } else if (LUNCH_REGEX.test(message)) {
-    return TokenType.LUNCH;
-  } else if (SNACK_REGEX.test(message)) {
-    return TokenType.SNACK;
-  } else if (DINNER_REGEX.test(message)) {
-    return TokenType.DINNER;
-  } else if (FREE_MEAL_REGEX.test(message)) {
-    return TokenType.FREE_MEAL;
-  } else if (COMPENSATORY_MEAL_REGEX.test(message)) {
-    return TokenType.COMPENSATORY_MEAL;
-  } else if (GYM_REGEX.test(message)) {
-    return TokenType.GYM;
-  } else if (STRENGTH_TRAINING_REGEX.test(message)) {
-    return TokenType.STRENGTH_TRAINING;
-  } else if (AEROBIC_EXERCISE_REGEX.test(message)) {
-    return TokenType.AEROBIC_EXERCISE;
+function buildRecord(dirtyToken: string, token: string, time?: string): Record {
+  if (IGNORE_REGEX.test(token)) {
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.IGNORE,
+      categorie: RecordCategorie.INDEFINITE,
+      stringValue: undefined,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (SAVE_NOTE_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, SAVE_NOTE_REGEX);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.SAVE_NOTE,
+      categorie: RecordCategorie.CONTROL,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (DELETE_REGEX.test(token)) {
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.DELETE,
+      categorie: RecordCategorie.CONTROL,
+      stringValue: undefined,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (INSULIN_NPH_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, numberRegex);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.INSULIN_NPH,
+      categorie: RecordCategorie.INSULIN,
+      stringValue: parts.remainingPart,
+      numberValue: Number(parts.matchedPart),
+      unit: INSULIN_UNIT,
+    };
+  } else if (INSULIN_R_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, numberRegex);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.INSULIN_R,
+      categorie: RecordCategorie.INSULIN,
+      stringValue: parts.remainingPart,
+      numberValue: Number(parts.matchedPart),
+      unit: INSULIN_UNIT,
+    };
+  } else if (INSULIN_UR_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, numberRegex);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.INSULIN_UR,
+      categorie: RecordCategorie.INSULIN,
+      stringValue: parts.remainingPart,
+      numberValue: Number(parts.matchedPart),
+      unit: INSULIN_UNIT,
+    };
+  } else if (GLUCOSE_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, numberRegex);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.GLUCOSE,
+      categorie: RecordCategorie.GLUCOSE,
+      stringValue: parts.remainingPart,
+      numberValue: Number(parts.matchedPart),
+      unit: GLUCOSE_UNIT,
+    };
+  } else if (SPELLED_HIGH_GLUCOSE_REGEX.test(token)) {
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.SPELLED_HIGH_GLUCOSE,
+      categorie: RecordCategorie.GLUCOSE,
+      stringValue: undefined,
+      numberValue: 250,
+      unit: GLUCOSE_UNIT,
+    };
+  } else if (SPELLED_LOW_GLUCOSE_REGEX.test(token)) {
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.SPELLED_LOW_GLUCOSE,
+      categorie: RecordCategorie.GLUCOSE,
+      stringValue: undefined,
+      numberValue: 50,
+      unit: GLUCOSE_UNIT,
+    };
+  } else if (BREAKFAST_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, BREAKFAST_REGEX);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.BREAKFAST,
+      categorie: RecordCategorie.MEAL,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (LUNCH_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, LUNCH_REGEX);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.LUNCH,
+      categorie: RecordCategorie.MEAL,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (SNACK_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, SNACK_REGEX);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.SNACK,
+      categorie: RecordCategorie.MEAL,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (DINNER_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, DINNER_REGEX);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.DINNER,
+      categorie: RecordCategorie.MEAL,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (FREE_MEAL_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, FREE_MEAL_REGEX);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.FREE_MEAL,
+      categorie: RecordCategorie.MEAL,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (COMPENSATORY_MEAL_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(
+      token,
+      COMPENSATORY_MEAL_REGEX
+    );
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.COMPENSATORY_MEAL,
+      categorie: RecordCategorie.MEAL,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (GYM_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(token, GYM_REGEX);
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.GYM,
+      categorie: RecordCategorie.EXERCISE,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (STRENGTH_TRAINING_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(
+      token,
+      STRENGTH_TRAINING_REGEX
+    );
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.STRENGTH_TRAINING,
+      categorie: RecordCategorie.EXERCISE,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
+  } else if (AEROBIC_EXERCISE_REGEX.test(token)) {
+    const parts = separateMatchedAndRemainingParts(
+      token,
+      AEROBIC_EXERCISE_REGEX
+    );
+    return {
+      dirtyToken,
+      token,
+      time,
+      tokenType: TokenType.AEROBIC_EXERCISE,
+      categorie: RecordCategorie.EXERCISE,
+      stringValue: parts.remainingPart,
+      numberValue: undefined,
+      unit: undefined,
+    };
   }
-  return TokenType.INDEFINITE;
+  return {
+    dirtyToken,
+    token,
+    tokenType: TokenType.INDEFINITE,
+    categorie: RecordCategorie.INDEFINITE,
+    stringValue: undefined,
+    numberValue: undefined,
+    unit: undefined,
+  };
 }
 
 function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
@@ -110,13 +310,13 @@ function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
 
 function buildResponse(userPhone: string, message: string): string {
   const tokens = message
-    .slice(0, 100) // primeiros 100 caracteres
+    //.slice(0, 100) // primeiros 100 caracteres
     .split(/[.,]/) // separa tokens por acentos e pontos
     .filter((token) => token !== ""); // remove tokens vazios
 
-  const record = tokens?.map((dirtyToken) => {
+  const records: Record[] = tokens?.map((dirtyToken) => {
     let token = sanitizeMessage(dirtyToken);
-    let time = null;
+    let time = undefined;
 
     const startsWithTimeH = separateMatchedAndRemainingParts(token, TIME_H);
     const startsWithTimeColon = separateMatchedAndRemainingParts(
@@ -133,22 +333,15 @@ function buildResponse(userPhone: string, message: string): string {
     }
 
     token = sanitizeMessage(token);
-
-    // todo: passar para tipo REcord
-    return {
-      dirtyToken,
-      token,
-      categorie: categorize(token),
-      time,
-    };
+    return buildRecord(dirtyToken, token, time);
   });
 
   return (
     "finalMessage: \n" +
-    record
+    records
       ?.map(
-        (info) =>
-          `dirtyToken: ${info.dirtyToken}\ntoken: ${info.token}\ncategorie: ${info.categorie}\ntime: ${info.time}`
+        (record) =>
+          `dirtyToken: ${record.dirtyToken}\ntoken: ${record.token}\ntokenType: ${record.tokenType}\ncategorie: ${record.categorie}\ntime: ${record.time}\nstringValue: ${record.stringValue}\nnumberValue: ${record.numberValue}\nunit: ${record.unit}`
       )
       ?.join(" \n\n")
   );

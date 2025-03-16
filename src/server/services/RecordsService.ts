@@ -45,8 +45,11 @@ export interface Record {
   token: string;
   tokenType: TokenType;
   categorie: RecordCategorie;
-  time?: Date;
+  time?: string; // transformar em data
   stringValue?: string;
   numberValue?: number;
   unit?: string;
 }
+
+export const GLUCOSE_UNIT = "mg/dL";
+export const INSULIN_UNIT = "UI";
