@@ -45,7 +45,7 @@ export interface Record {
   token: string;
   tokenType: TokenType;
   categorie: RecordCategorie;
-  time?: string; // transformar em data
+  dirtyTime?: string; // transformar em data
   stringValue?: string;
   numberValue?: number;
   unit?: string;

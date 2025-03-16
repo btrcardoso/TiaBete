@@ -53,12 +53,16 @@ function sanitizeMessage(message: string) {
     .trim(); // Remove espaços extras no início e fim
 }
 
-function buildRecord(dirtyToken: string, token: string, time?: string): Record {
+function buildRecord(
+  dirtyToken: string,
+  token: string,
+  dirtyTime?: string
+): Record {
   if (IGNORE_REGEX.test(token)) {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.IGNORE,
       categorie: RecordCategorie.INDEFINITE,
       stringValue: undefined,
@@ -70,7 +74,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.SAVE_NOTE,
       categorie: RecordCategorie.CONTROL,
       stringValue: parts.remainingPart,
@@ -81,7 +85,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.DELETE,
       categorie: RecordCategorie.CONTROL,
       stringValue: undefined,
@@ -93,7 +97,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.INSULIN_NPH,
       categorie: RecordCategorie.INSULIN,
       stringValue: parts.remainingPart,
@@ -105,7 +109,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.INSULIN_R,
       categorie: RecordCategorie.INSULIN,
       stringValue: parts.remainingPart,
@@ -117,7 +121,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.INSULIN_UR,
       categorie: RecordCategorie.INSULIN,
       stringValue: parts.remainingPart,
@@ -129,7 +133,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.GLUCOSE,
       categorie: RecordCategorie.GLUCOSE,
       stringValue: parts.remainingPart,
@@ -140,7 +144,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.SPELLED_HIGH_GLUCOSE,
       categorie: RecordCategorie.GLUCOSE,
       stringValue: undefined,
@@ -151,7 +155,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.SPELLED_LOW_GLUCOSE,
       categorie: RecordCategorie.GLUCOSE,
       stringValue: undefined,
@@ -163,7 +167,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.BREAKFAST,
       categorie: RecordCategorie.MEAL,
       stringValue: parts.remainingPart,
@@ -175,7 +179,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.LUNCH,
       categorie: RecordCategorie.MEAL,
       stringValue: parts.remainingPart,
@@ -187,7 +191,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.SNACK,
       categorie: RecordCategorie.MEAL,
       stringValue: parts.remainingPart,
@@ -199,7 +203,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.DINNER,
       categorie: RecordCategorie.MEAL,
       stringValue: parts.remainingPart,
@@ -211,7 +215,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.FREE_MEAL,
       categorie: RecordCategorie.MEAL,
       stringValue: parts.remainingPart,
@@ -226,7 +230,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.COMPENSATORY_MEAL,
       categorie: RecordCategorie.MEAL,
       stringValue: parts.remainingPart,
@@ -238,7 +242,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.GYM,
       categorie: RecordCategorie.EXERCISE,
       stringValue: parts.remainingPart,
@@ -253,7 +257,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.STRENGTH_TRAINING,
       categorie: RecordCategorie.EXERCISE,
       stringValue: parts.remainingPart,
@@ -268,7 +272,7 @@ function buildRecord(dirtyToken: string, token: string, time?: string): Record {
     return {
       dirtyToken,
       token,
-      time,
+      dirtyTime,
       tokenType: TokenType.AEROBIC_EXERCISE,
       categorie: RecordCategorie.EXERCISE,
       stringValue: parts.remainingPart,
@@ -316,7 +320,7 @@ function buildResponse(userPhone: string, message: string): string {
 
   const records: Record[] = tokens?.map((dirtyToken) => {
     let token = sanitizeMessage(dirtyToken);
-    let time = undefined;
+    let dirtyTime = undefined;
 
     const startsWithTimeH = separateMatchedAndRemainingParts(token, TIME_H);
     const startsWithTimeColon = separateMatchedAndRemainingParts(
@@ -325,15 +329,15 @@ function buildResponse(userPhone: string, message: string): string {
     );
 
     if (startsWithTimeH.matchedPart) {
-      time = startsWithTimeH.matchedPart;
+      dirtyTime = startsWithTimeH.matchedPart;
       token = startsWithTimeH.remainingPart;
     } else if (startsWithTimeColon.matchedPart) {
-      time = startsWithTimeColon.matchedPart;
+      dirtyTime = startsWithTimeColon.matchedPart;
       token = startsWithTimeColon.remainingPart;
     }
 
     token = sanitizeMessage(token);
-    return buildRecord(dirtyToken, token, time);
+    return buildRecord(dirtyToken, token, dirtyTime);
   });
 
   return (
@@ -341,7 +345,7 @@ function buildResponse(userPhone: string, message: string): string {
     records
       ?.map(
         (record) =>
-          `dirtyToken: ${record.dirtyToken}\ntoken: ${record.token}\ntokenType: ${record.tokenType}\ncategorie: ${record.categorie}\ntime: ${record.time}\nstringValue: ${record.stringValue}\nnumberValue: ${record.numberValue}\nunit: ${record.unit}`
+          `dirtyToken: ${record.dirtyToken}\ntoken: ${record.token}\ntokenType: ${record.tokenType}\ncategorie: ${record.categorie}\ndirtyTime: ${record.dirtyTime}\nstringValue: ${record.stringValue}\nnumberValue: ${record.numberValue}\nunit: ${record.unit}`
       )
       ?.join(" \n\n")
   );
