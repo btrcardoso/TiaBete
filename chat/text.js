@@ -23,6 +23,7 @@ const BREAKFAST_REGEX = /^cafe/;
 const LUNCH_REGEX = /^almoc/;
 const SNACK_REGEX = /^lanche/;
 const DINNER_REGEX = /^jant/;
+const FREE_MEAL_REGEX = /^refeicao\slivre/;
 const COMPENSATORY_MEAL_REGEX = /^compens/;
 
 const GYM_REGEX = /^(trein|acad(emia)?)/;
@@ -71,6 +72,8 @@ function categorize(message) {
     return "SNACK";
   } else if (DINNER_REGEX.test(message)) {
     return "DINNER";
+  } else if (FREE_MEAL_REGEX.test(message)) {
+    return "FREE_MEAL";
   } else if (COMPENSATORY_MEAL_REGEX.test(message)) {
     return "COMPENSATORY_MEAL";
   } else if (GYM_REGEX.test(message)) {
