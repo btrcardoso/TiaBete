@@ -31,8 +31,7 @@ async function send(
     console.log("Mensagem respondida");
     return message;
   } catch (error) {
-    console.log("Houve um erro ao enviar a mensagem");
-    console.log(error);
+    console.error("Houve um erro ao enviar a mensagem: ", error);
   }
 }
 

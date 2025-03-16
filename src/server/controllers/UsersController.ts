@@ -7,9 +7,8 @@ async function create(req: Request, res: Response) {
       name: req.body.name,
       phone: req.body.phone,
     };
-    console.log(userJson);
+    console.log("Criando usuário: ", userJson);
     await UsersService.createUser(userJson);
-
     res.sendStatus(200);
   } catch (e) {
     res.sendStatus(500);
