@@ -58,6 +58,10 @@ function sanitizeMessage(message: string) {
 }
 
 function buildBaseRecord(token: string): BaseRecord {
+  const numericTokenParts = separateMatchedAndRemainingParts(
+    token,
+    numberRegex
+  );
   if (IGNORE_REGEX.test(token)) {
     return {
       tokenType: TokenType.IGNORE,
@@ -84,39 +88,35 @@ function buildBaseRecord(token: string): BaseRecord {
       unit: undefined,
     };
   } else if (INSULIN_NPH_REGEX.test(token)) {
-    const parts = separateMatchedAndRemainingParts(token, numberRegex);
     return {
       tokenType: TokenType.INSULIN_NPH,
       categorie: RecordCategorie.INSULIN,
-      stringValue: parts.remainingPart,
-      numberValue: Number(parts.matchedPart),
+      stringValue: numericTokenParts.remainingPart,
+      numberValue: Number(numericTokenParts.matchedPart),
       unit: INSULIN_UNIT,
     };
   } else if (INSULIN_R_REGEX.test(token)) {
-    const parts = separateMatchedAndRemainingParts(token, numberRegex);
     return {
       tokenType: TokenType.INSULIN_R,
       categorie: RecordCategorie.INSULIN,
-      stringValue: parts.remainingPart,
-      numberValue: Number(parts.matchedPart),
+      stringValue: numericTokenParts.remainingPart,
+      numberValue: Number(numericTokenParts.matchedPart),
       unit: INSULIN_UNIT,
     };
   } else if (INSULIN_UR_REGEX.test(token)) {
-    const parts = separateMatchedAndRemainingParts(token, numberRegex);
     return {
       tokenType: TokenType.INSULIN_UR,
       categorie: RecordCategorie.INSULIN,
-      stringValue: parts.remainingPart,
-      numberValue: Number(parts.matchedPart),
+      stringValue: numericTokenParts.remainingPart,
+      numberValue: Number(numericTokenParts.matchedPart),
       unit: INSULIN_UNIT,
     };
   } else if (GLUCOSE_REGEX.test(token)) {
-    const parts = separateMatchedAndRemainingParts(token, numberRegex);
     return {
       tokenType: TokenType.GLUCOSE,
       categorie: RecordCategorie.GLUCOSE,
-      stringValue: parts.remainingPart,
-      numberValue: Number(parts.matchedPart),
+      stringValue: numericTokenParts.remainingPart,
+      numberValue: Number(numericTokenParts.matchedPart),
       unit: GLUCOSE_UNIT,
     };
   } else if (SPELLED_HIGH_GLUCOSE_REGEX.test(token)) {
