@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import bodyParser from "body-parser";
+import { router } from "./routes";
 
 //import providers from "./providers.js";
 // import chat from "./chat/index.js";
@@ -15,20 +16,6 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get("/", (req, res) => {
-  res.sendStatus(200);
-});
-
-app.get("/webhook", function (req, res) {
-  if (
-    req.query["hub.mode"] == "subscribe" &&
-    req.query["hub.verify_token"] == process.env.FB_VERIFICATION_TOKEN
-  ) {
-    res.send(req.query["hub.challenge"]);
-    console.log("Facebook verificou a URL");
-  } else {
-    res.sendStatus(400);
-  }
-});
+app.use(router);
 
 export { app };
