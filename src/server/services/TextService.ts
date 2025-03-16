@@ -1,6 +1,4 @@
-import axios from "axios";
 import dotenv from "dotenv";
-
 dotenv.config();
 
 const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
@@ -38,7 +36,7 @@ const AEROBIC_EXERCISE_REGEX = /^((cardio(vascular)?)|(aerobi(o|co)))/;
 // const LIGHT_AEROBIC_EXERCISE_REGEX =
 //   /^((cardio(vascular)?)|(aerobi(o|co)))(\sleve)?/;
 
-function sanitizeMessage(message) {
+function sanitizeMessage(message: string) {
   return message
     .toLowerCase() // Converte para minúsculas
     .normalize("NFD") // Decompõe caracteres acentuados
@@ -47,7 +45,7 @@ function sanitizeMessage(message) {
     .trim(); // Remove espaços extras no início e fim
 }
 
-function categorize(message) {
+function categorize(message: string) {
   if (IGNORE_REGEX.test(message)) {
     return "IGNORE";
   } else if (SAVE_NOTE_REGEX.test(message)) {
@@ -88,7 +86,7 @@ function categorize(message) {
   return "INDEFINITE";
 }
 
-function separateMatchedAndRemainingParts(str, regex) {
+function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
   const match = str.match(regex);
   let result;
 
@@ -109,11 +107,7 @@ function separateMatchedAndRemainingParts(str, regex) {
   return result;
 }
 
-function buildResponse(userPhone, message) {
-  if (typeof message !== "string") {
-    return "Mensagem não suportada.";
-  }
-
+function buildResponse(userPhone: string, message: string) {
   const tokens = message
     .slice(0, 100) // primeiros 100 caracteres
     .split(/[.,]/) // separa tokens por acentos e pontos
@@ -158,33 +152,4 @@ function buildResponse(userPhone, message) {
   );
 }
 
-async function send(fromId, destinationNumber, messageText) {
-  if (process.env.ENV === "DEV") {
-    console.log(
-      `Enviando mensagem de ${fromId} para ${destinationNumber}: ${messageText}`
-    );
-    return;
-  }
-  try {
-    let message = await axios({
-      method: "POST",
-      url: `https://graph.facebook.com/${process.env.FB_API_VERSION}/${fromId}/messages`,
-      data: {
-        messaging_product: "whatsapp",
-        to: destinationNumber,
-        text: { body: messageText },
-      },
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.FB_API_TOKEN}`,
-      },
-    });
-    console.log("Mensagem respondida");
-    return message;
-  } catch (error) {
-    console.log("Houve um erro ao enviar a mensagem");
-    console.log(error);
-  }
-}
-
-export default { send, buildResponse };
+export default { buildResponse };

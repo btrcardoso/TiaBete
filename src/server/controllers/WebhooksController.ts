@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import TextService from "../services/TextService";
+import FacebookClient from "../clients/FacebookClient";
 
 function verify(req: Request, res: Response) {
   if (
@@ -41,11 +42,11 @@ async function receiveAndSendMessage(request: Request, response: Response) {
         console.warn("API inconsistente");
         msgText = "Ainda estou aprendendo a responder esse tipo de mensagem.";
       }
-      TextService.send(ourNumberId, messageFrom, msgText);
+      FacebookClient.send(ourNumberId, messageFrom, msgText);
     }
 
-    response.sendStatus(200); //TODO descomentar
-    //response.send(msgText).status(200);
+    // response.sendStatus(200); //TODO descomentar
+    response.send(msgText).status(200);
   } else {
     response.sendStatus(400);
   }
