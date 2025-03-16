@@ -1,5 +1,7 @@
-const axios = require("axios");
-require("dotenv").config();
+import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
 const TIME_COLON = /^([01]?[0-9]|2[0-3]):[0-5][0-9]/;
@@ -185,4 +187,4 @@ async function send(fromId, destinationNumber, messageText) {
   }
 }
 
-module.exports = { send, buildResponse };
+export default { send, buildResponse };
