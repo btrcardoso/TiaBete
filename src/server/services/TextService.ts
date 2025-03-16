@@ -9,6 +9,7 @@ import {
   LOW_GLUCOSE,
   BaseRecord,
 } from "./RecordsService";
+
 dotenv.config();
 
 const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
@@ -255,7 +256,10 @@ function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
   return result;
 }
 
-function buildResponse(userPhone: string, message: string): string {
+function buildResponse(
+  userId: string,
+  message: string
+): { records: Record[]; message: string } {
   const tokens = message
     //.slice(0, 100) // primeiros 100 caracteres
     .split(/[.,]/) // separa tokens por acentos e pontos
@@ -280,9 +284,13 @@ function buildResponse(userPhone: string, message: string): string {
     }
 
     token = sanitizeMessage(token);
-    return { dirtyToken, token, dirtyTime, ...buildBaseRecord(token) };
+    return { dirtyToken, token, dirtyTime, userId, ...buildBaseRecord(token) };
   });
 
+  return { records, message: print(records) };
+}
+
+function print(records: Record[]): string {
   return (
     "finalMessage: \n" +
     records

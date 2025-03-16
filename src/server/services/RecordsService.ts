@@ -1,3 +1,6 @@
+import { Collection } from "mongodb";
+import { db } from "../database";
+
 export enum TokenType {
   // INSULIN
   INSULIN_NPH = "INSULIN_NPH",
@@ -54,7 +57,33 @@ export interface BaseRecord {
 }
 
 export interface Record extends BaseRecord {
+  userId: string;
   dirtyToken: string;
   token: string;
   dirtyTime?: string; // transformar em data
 }
+
+export interface RecordModel extends Record {
+  _id?: string;
+}
+
+const collectionRecords: Collection<RecordModel> =
+  db.collection<RecordModel>("records");
+
+async function insertRecords(records: Record[]): Promise<RecordModel[] | null> {
+  try {
+    const insertResult = await collectionRecords.insertMany(records);
+    const insertedIdsArray = Object.values(insertResult.insertedIds);
+
+    const found = await collectionRecords
+      .find({ _id: { $in: insertedIdsArray } })
+      .toArray();
+
+    return found;
+  } catch (error) {
+    console.error("Erro no createRecords: ", error);
+    return null;
+  }
+}
+
+export default { insertRecords };
