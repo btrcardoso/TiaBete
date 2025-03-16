@@ -45,13 +45,16 @@ export const GLUCOSE_UNIT = "mg/dL";
 export const LOW_GLUCOSE = 50;
 export const HIGH_GLUCOSE = 250;
 
-export interface Record {
-  dirtyToken: string;
-  token: string;
+export interface BaseRecord {
   tokenType: TokenType;
   categorie: RecordCategorie;
-  dirtyTime?: string; // transformar em data
   stringValue?: string;
   numberValue?: number;
   unit?: string;
+}
+
+export interface Record extends BaseRecord {
+  dirtyToken: string;
+  token: string;
+  dirtyTime?: string; // transformar em data
 }
