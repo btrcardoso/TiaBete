@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { Categorie, Record } from "./RecordsService";
+import { TokenType, Record } from "./RecordsService";
 dotenv.config();
 
 const TIME_H = /^([01]?[0-9]|2[0-3])h([0-5][0-9])?|^([01]?[0-9]|2[0-3])h/;
@@ -21,13 +21,13 @@ const SPELLED_LOW_GLUCOSE_REGEX =
   /^(hipog?l?i?c?e?m?i?a?)\s?(leve|braba|grave)?/;
 
 const BREAKFAST_REGEX = /^cafe/;
-const LUNCH_REGEX = /^almoc/;
-const SNACK_REGEX = /^lanche/;
-const DINNER_REGEX = /^jant/;
+const LUNCH_REGEX = /^almoc(o|ei)?/;
+const SNACK_REGEX = /^lanchei?/;
+const DINNER_REGEX = /^jant(ar?|ei)?/;
 const FREE_MEAL_REGEX = /^refeicao\slivre/;
-const COMPENSATORY_MEAL_REGEX = /^compens/;
+const COMPENSATORY_MEAL_REGEX = /^compens(ar|ei)?/;
 
-const GYM_REGEX = /^(trein|acad(emia)?)/;
+const GYM_REGEX = /^(trein(o|ei)?|acad(emia)?)/;
 const STRENGTH_TRAINING_REGEX = /^musc(ulacao)?/;
 const AEROBIC_EXERCISE_REGEX = /^((cardio(vascular)?)|(aerobi(o|co)))/;
 // const HEAVY_STRENGTH_TRAINING_REGEX = /^musc(ulacao)?(\s(pesad(o|a)|forte))?/;
@@ -48,43 +48,43 @@ function sanitizeMessage(message: string) {
 
 function categorize(message: string) {
   if (IGNORE_REGEX.test(message)) {
-    return Categorie.IGNORE;
+    return TokenType.IGNORE;
   } else if (SAVE_NOTE_REGEX.test(message)) {
-    return Categorie.SAVE_NOTE;
+    return TokenType.SAVE_NOTE;
   } else if (DELETE_REGEX.test(message)) {
-    return Categorie.DELETE;
+    return TokenType.DELETE;
   } else if (INSULIN_NPH_REGEX.test(message)) {
-    return Categorie.INSULIN_NPH;
+    return TokenType.INSULIN_NPH;
   } else if (INSULIN_R_REGEX.test(message)) {
-    return Categorie.INSULIN_R;
+    return TokenType.INSULIN_R;
   } else if (INSULIN_UR_REGEX.test(message)) {
-    return Categorie.INSULIN_UR;
+    return TokenType.INSULIN_UR;
   } else if (GLUCOSE_REGEX.test(message)) {
-    return Categorie.GLUCOSE;
+    return TokenType.GLUCOSE;
   } else if (SPELLED_HIGH_GLUCOSE_REGEX.test(message)) {
-    return Categorie.SPELLED_HIGH_GLUCOSE;
+    return TokenType.SPELLED_HIGH_GLUCOSE;
   } else if (SPELLED_LOW_GLUCOSE_REGEX.test(message)) {
-    return Categorie.SPELLED_LOW_GLUCOSE;
+    return TokenType.SPELLED_LOW_GLUCOSE;
   } else if (BREAKFAST_REGEX.test(message)) {
-    return Categorie.BREAKFAST;
+    return TokenType.BREAKFAST;
   } else if (LUNCH_REGEX.test(message)) {
-    return Categorie.LUNCH;
+    return TokenType.LUNCH;
   } else if (SNACK_REGEX.test(message)) {
-    return Categorie.SNACK;
+    return TokenType.SNACK;
   } else if (DINNER_REGEX.test(message)) {
-    return Categorie.DINNER;
+    return TokenType.DINNER;
   } else if (FREE_MEAL_REGEX.test(message)) {
-    return Categorie.FREE_MEAL;
+    return TokenType.FREE_MEAL;
   } else if (COMPENSATORY_MEAL_REGEX.test(message)) {
-    return Categorie.COMPENSATORY_MEAL;
+    return TokenType.COMPENSATORY_MEAL;
   } else if (GYM_REGEX.test(message)) {
-    return Categorie.GYM;
+    return TokenType.GYM;
   } else if (STRENGTH_TRAINING_REGEX.test(message)) {
-    return Categorie.STRENGTH_TRAINING;
+    return TokenType.STRENGTH_TRAINING;
   } else if (AEROBIC_EXERCISE_REGEX.test(message)) {
-    return Categorie.AEROBIC_EXERCISE;
+    return TokenType.AEROBIC_EXERCISE;
   }
-  return Categorie.INDEFINITE;
+  return TokenType.INDEFINITE;
 }
 
 function separateMatchedAndRemainingParts(str: string, regex: RegExp) {
