@@ -2,7 +2,7 @@
   "name": "tiabete",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "./build/index.js",
   "scripts": {
     "start": "node ./build/index.js",
     "dev": "tsx watch src/index.ts",
